@@ -1,0 +1,21 @@
+dist/assets/index-uUyvhlps.js
+  s_438151aa164e5e::t_da6fa236f0db51 1-823
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "46031833bd514d24608bd3569746821c62f33f29",
+  "prompts": {},
+  "sessions": {
+    "s_438151aa164e5e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4e76aced-c8be-4132-9981-ca215fbcd0f6",
+        "model": "unknown"
+      },
+      "human_author": "tuyong <tuyong@bytedance.com>"
+    }
+  },
+  "attestation_metadata": {},
+  "remote_transcripts": {}
+}
