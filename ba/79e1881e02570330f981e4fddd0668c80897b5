@@ -1,0 +1,21 @@
+.gitignore
+  s_f4aa7f251598ed::t_9db3ab5c2c250d 35
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "ba79e1881e02570330f981e4fddd0668c80897b5",
+  "prompts": {},
+  "sessions": {
+    "s_f4aa7f251598ed": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "20a00345-e358-47df-910c-7fcae8743cb6",
+        "model": "unknown"
+      },
+      "human_author": "tuyong <tuyong@bytedance.com>"
+    }
+  },
+  "attestation_metadata": {},
+  "remote_transcripts": {}
+}
