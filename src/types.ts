@@ -1,5 +1,11 @@
 export type Coordinates = [number, number]
 
+declare global {
+  interface Window {
+    routesByDay?: Map<string, RouteLeg[]>
+  }
+}
+
 export type PlaceKind = 'city' | 'culture' | 'nature' | 'landmark' | 'hotel' | 'transport'
 
 export interface Inspiration {

@@ -25,6 +25,7 @@ import type { Coordinates, Place, PlaceKind, PlaybackCursor, RouteLeg, TripDay }
 
 const routes = routeData as RouteLeg[]
 const routesByDay = new Map(roadDays.map((day) => [day.id, routes.filter((leg) => leg.dayId === day.id)]))
+window.routesByDay = routesByDay
 const roadRoute = {
   type: 'Feature' as const,
   properties: {},
