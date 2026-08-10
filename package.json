@@ -4,6 +4,9 @@
   "private": true,
   "description": "Interactive Hexi Corridor travel roadbook",
   "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
