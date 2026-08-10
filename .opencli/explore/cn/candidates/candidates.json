@@ -1,0 +1,14 @@
+{
+  "site": "cn",
+  "target_url": "https://www.bing.com/images/search?q=大地之子+瓜州&first=1",
+  "generated_from": ".opencli/explore/cn",
+  "candidate_count": 1,
+  "candidates": [
+    {
+      "name": "async",
+      "path": ".opencli/explore/cn/candidates/async.yaml",
+      "strategy": "cookie",
+      "confidence": 0.25
+    }
+  ]
+}

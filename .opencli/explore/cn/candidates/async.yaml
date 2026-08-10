@@ -1,0 +1,43 @@
+site: cn
+name: async
+description: bing async (auto-generated)
+domain: www.bing.com
+strategy: cookie
+browser: true
+args:
+  keyword:
+    type: str
+    required: true
+    description: Search keyword
+  limit:
+    type: int
+    default: 20
+    description: Number of items to return
+pipeline:
+  - navigate: https://www.bing.com/images/search?q=${{ args.keyword }}&first=1
+  - evaluate: |
+      (async () => {
+        // Find the async endpoint from the page
+        const script = Array.from(document.querySelectorAll('script')).find(s => s.textContent.includes('imgbf'));
+        if (!script) return [];
+
+        const imgbfMatch = script.textContent.match(/imgbf=([^&]+)/);
+        const imgbf = imgbfMatch ? imgbfMatch[1] : '';
+
+        const igMatch = script.textContent.match(/IG=([^&]+)/);
+        const ig = igMatch ? igMatch[1] : '';
+
+        const res = await fetch(`https://cn.bing.com/images/async?q=${encodeURIComponent('${{ args.keyword }}')}&first=1&count=${${{ args.limit | default(20) }}}&cw=1265&ch=779&relp=35&datsrc=I&layout=RowBased_Landscape&apc=0&imgbf=${imgbf}&mmasync=1&dgState=x*0_y*0_h*0_c*5_i*1_r*0&IG=${ig}&SFX=2`, {
+          credentials: 'include'
+        });
+
+        const data = await res.json();
+        return (data?.data?.data?.list || []);
+      })()
+  - map:
+      title: ${{ item.title }}
+      url: ${{ item.mediaurl }}
+  - limit: ${{ args.limit | default(20) }}
+columns:
+  - title
+  - url

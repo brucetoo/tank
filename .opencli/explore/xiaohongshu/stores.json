@@ -1,0 +1,796 @@
+[
+  {
+    "actions": [
+      "getUserInfo",
+      "waitForActivate",
+      "earlyActivateIfGuest",
+      "getUserFollow",
+      "getUserPageInfo",
+      "toFollow",
+      "unFollow",
+      "fetchNotes",
+      "onTouristLogin",
+      "updateFollowStatus",
+      "fetchProfilePageData",
+      "resetProfilePageData",
+      "toggleUserApiV2",
+      "getUIDByUrl",
+      "refreshUserBoard"
+    ],
+    "id": "user",
+    "stateKeys": [
+      "loggedIn",
+      "activated",
+      "userInfo",
+      "follow",
+      "userPageData",
+      "isOwnPage",
+      "visitTargetUserId",
+      "activeTab",
+      "notes",
+      "isFetchingNotes",
+      "tabScrollTop",
+      "userFetchingStatus",
+      "userNoteFetchingStatus",
+      "bannedInfo",
+      "firstFetchNote"
+    ],
+    "type": "pinia"
+  },
+  {
+    "actions": [
+      "updateAppSettings",
+      "setFirstVisitUrl",
+      "setCurrentLayout",
+      "setFeedbackPopupVisible",
+      "loadWebGlobalConfig"
+    ],
+    "id": "global",
+    "stateKeys": [
+      "appSettings",
+      "supportWebp",
+      "serverTime",
+      "grayMode",
+      "currentPageInstance",
+      "referer",
+      "pwaAddDesktopPrompt",
+      "firstVisitUrl",
+      "easyAccessModalVisible",
+      "currentLayout",
+      "isNIO",
+      "fullscreenLocking",
+      "feedbackPopupVisible",
+      "trackFps",
+      "supportAVIF"
+    ],
+    "type": "pinia"
+  },
+  {
+    "actions": [
+      "loadMoreBoardListData",
+      "getBoardFeeds",
+      "getBoardDetails",
+      "getBoardPageData"
+    ],
+    "id": "board",
+    "stateKeys": [
+      "boardListData",
+      "isLoadingBoardList",
+      "boardDetails",
+      "boardFeedsMap",
+      "boardPageStatus",
+      "userBoardList",
+      "errorInfo"
+    ],
+    "type": "pinia"
+  },
+  {
+    "actions": [
+      "setUserFileListData",
+      "removeFile"
+    ],
+    "id": "UserFileStore",
+    "stateKeys": [
+      "visitTargetUserId",
+      "currentFileListData"
+    ],
+    "type": "pinia"
+  },
+  {
+    "actions": [
+      "reset",
+      "openLogin",
+      "openLoginForNoteOverlay",
+      "closeLogin",
+      "toggleAgree",
+      "toggleTooltip",
+      "clearPhone",
+      "updateQrData",
+      "setIsObPagesVisible",
+      "setObPageFillInProgress",
+      "beforeFillInGender",
+      "beforeFillInAge",
+      "afterFillInAge",
+      "setInSpamCheckSendAuthCode",
+      "reportUserInfo",
+      "getRegisterFusingConfig",
+      "handleLoginStep",
+      "setLogining",
+      "setRiskUser",
+      "setInAntiSpamCheckLogin"
+    ],
+    "id": "login",
+    "stateKeys": [
+      "loginMethod",
+      "from",
+      "showLogin",
+      "agreed",
+      "showTooltip",
+      "loginData",
+      "validPhone",
+      "validCode",
+      "errors",
+      "qrData",
+      "counter",
+      "inAntiSpamChecking",
+      "recentFrom",
+      "isObPagesVisible",
+      "obPageFillInProgress"
+    ],
+    "type": "pinia"
+  },
+  {
+    "actions": [
+      "fetchFeeds",
+      "fetchFeedsOnServer",
+      "getLikeNum",
+      "reset",
+      "switchCategory",
+      "initMfStatistics",
+      "addReadFeedCount",
+      "addVisitTimes",
+      "getHomefeedCategory",
+      "getResourceInfo",
+      "toggleFeedsApiPrefetch",
+      "updatePrefetchId",
+      "clearPlaceholderFeeds",
+      "setIsUsingPlaceholderFeeds",
+      "setPlaceholderFeedsConsumed",
+      "setIsReplace",
+      "setImgNoteFilterStatus",
+      "updateCategory"
+    ],
+    "id": "feed",
+    "stateKeys": [
+      "query",
+      "isFetching",
+      "isError",
+      "feedsWrapper",
+      "undertakeNote",
+      "undertakeNoteError",
+      "feeds",
+      "currentChannel",
+      "unreadInfo",
+      "validIds",
+      "mfStatistics",
+      "channels",
+      "isResourceDisplay",
+      "isActivityEnd",
+      "cancelFeedRequest"
+    ],
+    "type": "pinia"
+  },
+  {
+    "actions": [
+      "resize"
+    ],
+    "id": "layout",
+    "stateKeys": [
+      "layoutInfoReady",
+      "columns",
+      "columnsWithSidebar",
+      "gap",
+      "horizontalGapPx",
+      "columnWidth",
+      "feedsWrapperWidth",
+      "feedsContentWidth",
+      "minRenderNotes",
+      "interactionWidth",
+      "isMin",
+      "widthType",
+      "bufferRow",
+      "sideBarWidth",
+      "isMobileStyle"
+    ],
+    "type": "pinia"
+  },
+  {
+    "actions": [],
+    "id": "aiAbExp",
+    "stateKeys": [
+      "isAIMode",
+      "useDqaInstant"
+    ],
+    "type": "pinia"
+  },
+  {
+    "actions": [
+      "getNotification",
+      "replyComment",
+      "getNotificationCount",
+      "exposeNotificationItem",
+      "reset"
+    ],
+    "id": "notification",
+    "stateKeys": [
+      "isFetching",
+      "activeTabUnreadCount",
+      "activeTabKey",
+      "activeTabName",
+      "notificationCount",
+      "notificationMap"
+    ],
+    "type": "pinia"
+  },
+  {
+    "actions": [
+      "fetchSchedule"
+    ],
+    "id": "worldCupMatchSchedule",
+    "stateKeys": [
+      "data",
+      "rawCalendarData",
+      "loading",
+      "error",
+      "hasLeftPage"
+    ],
+    "type": "pinia"
+  },
+  {
+    "actions": [
+      "loadMore",
+      "getSuggestions",
+      "updateKeywordFrom",
+      "initSuggestions",
+      "mutateSearchValue",
+      "getQueryTrending",
+      "getSugRecommend",
+      "setQueryTrendingWithBack",
+      "getUserLists",
+      "loadMoreUsers",
+      "resetFetchingStatus",
+      "clearHistoryList",
+      "deleteHistory",
+      "addHistory",
+      "getHistoryList",
+      "initHistory",
+      "searchPageCloseLoginBox",
+      "setHotspotSearch",
+      "checkHotspotStorageStatus",
+      "resetSearchFilter"
+    ],
+    "id": "search",
+    "stateKeys": [
+      "state",
+      "searchContext",
+      "feeds",
+      "searchValue",
+      "isAiHeaderInputFocused",
+      "pendingWendianDowngradeFocus",
+      "suggestions",
+      "userInputSugTrigger",
+      "keywordFrom",
+      "sourcePageInstance",
+      "tagSearch",
+      "activeTagSearch",
+      "searchFeedsWrapper",
+      "currentSearchType",
+      "hintWord"
+    ],
+    "type": "pinia"
+  },
+  {
+    "actions": [
+      "initAgent",
+      "ensureConnected",
+      "disconnect",
+      "setSetupPromise",
+      "createConversation",
+      "clearConversation",
+      "sendMessage",
+      "updateHistoryQuerys",
+      "getLonglinkAdapter",
+      "getCurrentRoundId",
+      "setCurrentActiveRoundId",
+      "getCurrentActiveRoundId",
+      "loadHistoryDetail",
+      "retryLoadHistoryDetail",
+      "ensureLastMessageCompleteByMsgId",
+      "switchScene",
+      "getConversation",
+      "getSceneRounds"
+    ],
+    "id": "conversation",
+    "stateKeys": [
+      "agent",
+      "activeConversation",
+      "messages",
+      "rounds",
+      "unfinishedMessages",
+      "isExistUnfinishedMessages",
+      "lastMessageInConversation",
+      "historyQuerys",
+      "currentActiveRoundId",
+      "isInitializing",
+      "coordinator",
+      "historyLoadError",
+      "isHistoryDetailMode",
+      "currentScene"
+    ],
+    "type": "pinia"
+  },
+  {
+    "actions": [
+      "getCurrentRound",
+      "openTraceSourceDrawer",
+      "closeTraceSourceDrawer",
+      "openTraceSourceKeywordDrawer",
+      "closeTraceSourceKeywordDrawer",
+      "setComplexSourcePriority",
+      "hasTraceSourceCache",
+      "setTraceSourceCache",
+      "getTraceSourceCache",
+      "clearTraceSourceCache"
+    ],
+    "id": "traceSourceStore",
+    "stateKeys": [
+      "traceSourceInfo",
+      "traceSourceKeywordInfo",
+      "drawerPriorityMap"
+    ],
+    "type": "pinia"
+  },
+  {
+    "actions": [
+      "getGuideWordsData"
+    ],
+    "id": "AiSugDataForChat",
+    "stateKeys": [
+      "guideWordsData"
+    ],
+    "type": "pinia"
+  },
+  {
+    "actions": [
+      "openActivity",
+      "closePanel",
+      "setEntryInfo",
+      "getEntryInfo",
+      "openActivityPanel",
+      "setExposed",
+      "isExposed",
+      "getGlobalConfig",
+      "getJumpType"
+    ],
+    "id": "activity",
+    "stateKeys": [
+      "isOpen",
+      "currentUrl",
+      "entryList"
+    ],
+    "type": "pinia"
+  },
+  {
+    "actions": [
+      "mutateGetSportSearchOnebox",
+      "runGetSportSearchOnebox",
+      "refreshOnebox",
+      "startOneboxPolling",
+      "stopOneboxPolling",
+      "setPreliveStatusSubscribed",
+      "setPreliveStatusUnsubscribed",
+      "resetOneboxData",
+      "syncTrailerReservedState",
+      "getTrailerReservedState"
+    ],
+    "id": "sportSearchOnebox",
+    "stateKeys": [
+      "oneboxData",
+      "brandInfo",
+      "enableMainVenueJump",
+      "trailerReservedMap",
+      "isOneboxMainVenueOffline",
+      "isOneboxTeamPlayerOffline",
+      "isOneboxOtherOffline"
+    ],
+    "type": "pinia"
+  },
+  {
+    "actions": [
+      "setRedDotVisible",
+      "initWorldcupAccess",
+      "addWorldCupActiveClass",
+      "removeWorldCupActiveClass"
+    ],
+    "id": "worldCup26",
+    "stateKeys": [
+      "accessData",
+      "isRedDotVisible",
+      "currentRouteName",
+      "showWorldCup",
+      "isWorldCupAccessDenied",
+      "worldCupBgConfig",
+      "isWorldCupRoute",
+      "isFixturesRoute",
+      "isMatchRoute",
+      "isTeamRoute",
+      "worldCupBgMode",
+      "worldCupHeaderImageUrl",
+      "worldCupBgColor",
+      "worldCupHeaderSpacerHeight",
+      "isWorldCupPath"
+    ],
+    "type": "pinia"
+  },
+  {
+    "actions": [
+      "getImageListByNoteId",
+      "getTrackDataByNoteId",
+      "reset",
+      "setSeoRobots",
+      "getSeoRobots",
+      "hasSeoRobots",
+      "updateNoteByNoteId",
+      "getNoteDetailByNoteId",
+      "collectServerRequestError",
+      "getDefaultNoteId",
+      "deleteNoteDetailByNoteId",
+      "setCurrentNoteId",
+      "setRoute",
+      "updateMediaWidth",
+      "updateHeight",
+      "updateWidthAndHeight"
+    ],
+    "id": "note",
+    "stateKeys": [
+      "prevRouteData",
+      "prevRoute",
+      "commentTarget",
+      "isImgFullscreen",
+      "gotoPage",
+      "firstNoteId",
+      "autoOpenNote",
+      "topCommentId",
+      "noteDetailMap",
+      "serverRequestInfo",
+      "noteRequest",
+      "volume",
+      "recommendVideoMap",
+      "videoFeedType",
+      "rate"
+    ],
+    "type": "pinia"
+  },
+  {
+    "actions": [
+      "getCollectionList",
+      "getFeedFetchedInfo",
+      "getFeedFetchNotesInfo",
+      "setFeedFetchedInfo"
+    ],
+    "id": "nioStore",
+    "stateKeys": [
+      "collectionListDataSource",
+      "collectionListFeedFetchInfos",
+      "error"
+    ],
+    "type": "pinia"
+  },
+  {
+    "actions": [],
+    "id": "AiInputImageStore",
+    "stateKeys": [
+      "imageList"
+    ],
+    "type": "pinia"
+  },
+  {
+    "actions": [],
+    "id": "AiInputNoteStore",
+    "stateKeys": [
+      "selectedNotes"
+    ],
+    "type": "pinia"
+  },
+  {
+    "actions": [],
+    "id": "liveAbExp",
+    "stateKeys": [
+      "isLiveMode",
+      "isMultiCameraMode",
+      "isPlaybackMode"
+    ],
+    "type": "pinia"
+  },
+  {
+    "actions": [],
+    "id": "redAbExp",
+    "stateKeys": [
+      "isVisibleMode"
+    ],
+    "type": "pinia"
+  },
+  {
+    "actions": [
+      "fetchChatList",
+      "fetchChatInfo",
+      "getChatModel",
+      "upsertChatModel",
+      "updateChatModel",
+      "deleteChatModel",
+      "clearChats",
+      "updateChatFrontChain",
+      "updateChatFrontChainByMsg"
+    ],
+    "id": "chatData",
+    "stateKeys": [
+      "isLoading",
+      "error",
+      "chatList",
+      "chatCount",
+      "unreadChatCount"
+    ],
+    "type": "pinia"
+  },
+  {
+    "actions": [
+      "fetchGroupChatList",
+      "fetchGroupChatInfo",
+      "getGroupModel",
+      "upsertGroupModel",
+      "updateGroupModel",
+      "deleteGroupModel",
+      "clearGroups",
+      "updateGroupFrontChain",
+      "updateGroupFrontChainByMsg"
+    ],
+    "id": "groupData",
+    "stateKeys": [
+      "isLoading",
+      "error",
+      "groupList",
+      "groupCount",
+      "unreadGroupCount"
+    ],
+    "type": "pinia"
+  },
+  {
+    "actions": [
+      "updateChatUnread",
+      "updateGroupUnread",
+      "incrementChatUnread",
+      "incrementGroupUnread",
+      "clearChatUnread",
+      "clearGroupUnread",
+      "resetAll",
+      "markUnreadInitialized"
+    ],
+    "id": "redBadge",
+    "stateKeys": [
+      "chatUnread",
+      "groupUnread",
+      "isUnreadInitialized",
+      "totalUnread",
+      "hasUnread"
+    ],
+    "type": "pinia"
+  },
+  {
+    "actions": [
+      "fetchFeeds",
+      "reset",
+      "resetQuery",
+      "setIsReplace",
+      "getHomefeedCategory",
+      "updateQuery"
+    ],
+    "id": "red",
+    "stateKeys": [
+      "query",
+      "isFetching",
+      "isError",
+      "feedsWrapper",
+      "feeds",
+      "currentChannel",
+      "channels",
+      "cancelFeedRequest",
+      "prefetchId",
+      "mfRequestMetaData",
+      "pageStatus",
+      "isReplace",
+      "isFirstSuccessFetched",
+      "ssrRequestStatus",
+      "ssrRenderExtra"
+    ],
+    "type": "pinia"
+  },
+  {
+    "actions": [
+      "getLastConversationId",
+      "setLastConversationId",
+      "clearLastConversationId",
+      "clearAll"
+    ],
+    "id": "lastConversation",
+    "stateKeys": [
+      "conversationMap"
+    ],
+    "type": "pinia"
+  },
+  {
+    "actions": [
+      "fetchRecommendQuery"
+    ],
+    "id": "aiRecommendQuery",
+    "stateKeys": [
+      "recommendList",
+      "loading"
+    ],
+    "type": "pinia"
+  },
+  {
+    "actions": [
+      "openComplexSourcePanel",
+      "closeComplexSourcePanel"
+    ],
+    "id": "complexSourceStore",
+    "stateKeys": [
+      "complexSourceInfo",
+      "panelTitle"
+    ],
+    "type": "pinia"
+  },
+  {
+    "actions": [],
+    "id": "AiGuideWords",
+    "stateKeys": [
+      "guideWords"
+    ],
+    "type": "pinia"
+  },
+  {
+    "actions": [],
+    "id": "redMoji",
+    "stateKeys": [
+      "mojiData"
+    ],
+    "type": "pinia"
+  },
+  {
+    "actions": [
+      "toggleNote",
+      "selectNotes",
+      "deselectNotes",
+      "isSelected",
+      "isDisabled",
+      "clearSelected",
+      "fetchCollectedNotes",
+      "fetchCollectedBoards",
+      "fetchCollectionCounts",
+      "fetchBoardNotes",
+      "fetchBoardNotesFirstPage",
+      "refreshBoardNotes",
+      "rebuildSelectedBoardIdSet",
+      "fetchLikedNotes",
+      "resetListCache",
+      "searchNotes",
+      "fetchSearchTab",
+      "clearSearch"
+    ],
+    "id": "aiNotePicker",
+    "stateKeys": [
+      "selectedNotes",
+      "MAX_SELECT",
+      "collectedNotes",
+      "collectedNotesPagination",
+      "collectedBoards",
+      "collectedBoardsPagination",
+      "collectionNoteCount",
+      "collectionBoardCount",
+      "boardNotesMap",
+      "selectedBoardIdSet",
+      "likedNotes",
+      "likedNotesPagination",
+      "searchKeyword",
+      "isSearching",
+      "currentSearchId"
+    ],
+    "type": "pinia"
+  },
+  {
+    "actions": [
+      "calculateAndApplyCustomLayout"
+    ],
+    "id": "aiNoteModalFeedLayout",
+    "stateKeys": [
+      "layoutInfoReady",
+      "columns",
+      "columnsWithSidebar",
+      "gap",
+      "horizontalGapPx",
+      "columnWidth",
+      "feedsWrapperWidth",
+      "feedsContentWidth",
+      "minRenderNotes",
+      "bufferRow"
+    ],
+    "type": "pinia"
+  },
+  {
+    "actions": [
+      "init",
+      "dispose",
+      "setLiveActive",
+      "handleClose",
+      "handleAction"
+    ],
+    "id": "worldCupGuide",
+    "stateKeys": [
+      "visible",
+      "currentType",
+      "currentConfig",
+      "currentPageType",
+      "isCheckingVpn"
+    ],
+    "type": "pinia"
+  },
+  {
+    "actions": [
+      "getMessageList",
+      "getMinStoreId",
+      "getMessageByUUID",
+      "upsertMessage",
+      "upsertMessages",
+      "confirmMessage",
+      "markMessageFailed",
+      "sendMsgInner",
+      "revokeMessage",
+      "applyRevokeSignal",
+      "canRevokeMessageType",
+      "getRevokeEditContent",
+      "clearRevokeEditMap",
+      "triggerUpdate",
+      "blankMessage",
+      "getLastValidMessage",
+      "getRevokedMessage",
+      "findSessionByMessageId",
+      "clearSessionMessages",
+      "clearAll"
+    ],
+    "id": "messageData",
+    "stateKeys": [],
+    "type": "pinia"
+  },
+  {
+    "actions": [
+      "init",
+      "loadMyStickers",
+      "loadHotStickers",
+      "reset"
+    ],
+    "id": "emojiData",
+    "stateKeys": [
+      "imTabs",
+      "emojiTabIndex",
+      "redmojiTabs",
+      "lottieTabs",
+      "emojiParseMap",
+      "myStickers",
+      "hotStickers",
+      "isLoadingConfig",
+      "isLoadingMyStickers",
+      "isLoadingHotStickers"
+    ],
+    "type": "pinia"
+  }
+]

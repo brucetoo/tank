@@ -1,0 +1,27 @@
+[
+  {
+    "name": "async",
+    "description": "bing async",
+    "strategy": "cookie",
+    "confidence": 0.25,
+    "endpoint": "cn.bing.com/images/async?IG={}&SFX={}&apc={}&ch={}&count={}&cw={}&datsrc={}&dgState={}&first={}&iid={}&imgbf={}&layout={}&mmasync={}&q={}&relp={}",
+    "itemPath": null,
+    "recommendedColumns": [
+      "title",
+      "url"
+    ],
+    "recommendedArgs": [
+      {
+        "name": "keyword",
+        "type": "str",
+        "required": true
+      },
+      {
+        "name": "limit",
+        "type": "int",
+        "required": false,
+        "default": 20
+      }
+    ]
+  }
+]

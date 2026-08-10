@@ -1,0 +1,31 @@
+[
+  {
+    "pattern": "cn.bing.com/images/async?IG={}&SFX={}&apc={}&ch={}&count={}&cw={}&datsrc={}&dgState={}&first={}&iid={}&imgbf={}&layout={}&mmasync={}&q={}&relp={}",
+    "method": "GET",
+    "url": "https://cn.bing.com/images/async?q=%e5%a4%a7%e5%9c%b0%e4%b9%8b%e5%ad%90+%e7%93%9c%e5%b7%9e&first=36&count=35&cw=1265&ch=779&relp=35&datsrc=I&layout=RowBased_Landscape&apc=0&imgbf=DfCtqwgAAACQAQAAAAAAAAAAAAAFAAAA7AHjhONfTNkUpAME1AWbbmsNsCAgOhMBEAQbQF7ApQCYhaEbWIqVIRwLSARpXVa6dKhOKICQiQH0BAAAAAAAAA%3d%3d&mmasync=1&dgState=x*0_y*0_h*0_c*5_i*36_r*7&IG=F2D08A8E2B7145448492D6C38D02319B&SFX=2&iid=images.5605",
+    "status": null,
+    "contentType": "",
+    "score": 5,
+    "queryParams": [
+      "q",
+      "first",
+      "count",
+      "cw",
+      "ch",
+      "relp",
+      "datsrc",
+      "layout",
+      "apc",
+      "imgbf",
+      "mmasync",
+      "dgState",
+      "IG",
+      "SFX",
+      "iid"
+    ],
+    "itemPath": null,
+    "itemCount": 0,
+    "detectedFields": {},
+    "authIndicators": []
+  }
+]
