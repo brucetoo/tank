@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import * as maplibregl from 'maplibre-gl'
+import mapLibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'
 import type { GeoJSONSource, Map as MapLibreMap, Marker } from 'maplibre-gl'
 import {
   ArrowUpRight,
@@ -22,6 +23,8 @@ import {
 import { days, places, roadDays } from './data/itinerary'
 import routeData from './data/routes.json'
 import type { Coordinates, Place, PlaceKind, PlaybackCursor, RouteLeg, TripDay } from './types'
+
+maplibregl.setWorkerUrl(mapLibreWorkerUrl)
 
 const routes = routeData as RouteLeg[]
 const routesByDay = new Map(roadDays.map((day) => [day.id, routes.filter((leg) => leg.dayId === day.id)]))
