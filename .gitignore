@@ -32,3 +32,4 @@ dist-ssr
 
 # Build files
 *.tsbuildinfo
+.vercel
