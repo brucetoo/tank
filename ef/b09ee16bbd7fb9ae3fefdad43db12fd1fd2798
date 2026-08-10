@@ -1,0 +1,29 @@
+dist/assets/index-CNCAYvhr.css
+  s_e41fcccb0a6297::t_78c4913ad4ba70 1
+dist/assets/index-ut4Xfefj.js
+  s_e41fcccb0a6297::t_36c1f1b91449cf 1-823
+dist/index.html
+  s_e41fcccb0a6297::t_7dfdf7f943c29a 1-15
+src/App.tsx
+  s_e41fcccb0a6297::t_c68269e070ec2b 1-764
+tsconfig.app.tsbuildinfo
+  s_e41fcccb0a6297::t_1c871c6e38f8c5 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "efb09ee16bbd7fb9ae3fefdad43db12fd1fd2798",
+  "prompts": {},
+  "sessions": {
+    "s_e41fcccb0a6297": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "afb4aa42-4d27-4272-ab0b-7905889e3f3b",
+        "model": "unknown"
+      },
+      "human_author": "tuyong <tuyong@bytedance.com>"
+    }
+  },
+  "attestation_metadata": {},
+  "remote_transcripts": {}
+}
