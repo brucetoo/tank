@@ -1,0 +1,23 @@
+src/App.tsx
+  s_f4aa7f251598ed::t_b55ed040a6cc1f 28
+src/types.ts
+  s_f4aa7f251598ed::t_44f1e2a9b0a575 3-8
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "63d9441ec2507e1620ea2968d32bbfdc06b17a9d",
+  "prompts": {},
+  "sessions": {
+    "s_f4aa7f251598ed": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "20a00345-e358-47df-910c-7fcae8743cb6",
+        "model": "unknown"
+      },
+      "human_author": "tuyong <tuyong@bytedance.com>"
+    }
+  },
+  "attestation_metadata": {},
+  "remote_transcripts": {}
+}
