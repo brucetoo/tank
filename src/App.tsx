@@ -22,6 +22,7 @@ import {
 } from 'lucide-react'
 import { days, places, roadDays } from './data/itinerary'
 import routeData from './data/routes.json'
+import { getImageUrl } from './imageUrl'
 import type { Coordinates, Place, PlaceKind, PlaybackCursor, RouteLeg, TripDay } from './types'
 
 maplibregl.setWorkerUrl(mapLibreWorkerUrl)
@@ -534,10 +535,12 @@ function DateRail({ selectedIndex, onSelect }: { selectedIndex: number; onSelect
 }
 
 function PlacePanel({ place }: { place: Place }) {
+  const imageUrl = getImageUrl(place.image)
+
   return (
     <article className="place-panel" aria-live="polite">
-      <div className="place-visual" style={{ '--place-image': `url("${place.image}")` } as React.CSSProperties}>
-        <img src={place.image} alt={`${place.name}的小红书实拍`} />
+      <div className="place-visual" style={{ '--place-image': `url("${imageUrl}")` } as React.CSSProperties}>
+        <img src={imageUrl} alt={`${place.name}的小红书实拍`} />
         <div className="visual-stamp"><span>{kindLabel[place.kind]}</span><b>{place.coordinates[1].toFixed(2)}°N</b></div>
         <a className="image-credit" href={place.imageSource.url} target="_blank" rel="noreferrer" aria-label={`查看图片来源：${place.imageSource.title}`}>
           <span>{place.imageCredit}</span>
