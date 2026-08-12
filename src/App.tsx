@@ -23,12 +23,20 @@ import {
 import { days, places, roadDays } from './data/itinerary'
 import routeData from './data/routes.json'
 import { getImageUrl } from './imageUrl'
+import type { RouteVehicle3DLayer } from './routeVehicle3D'
 import type { Coordinates, Place, PlaceKind, PlaybackCursor, RouteLeg, TripDay } from './types'
 
 maplibregl.setWorkerUrl(mapLibreWorkerUrl)
 
 const routes = routeData as RouteLeg[]
 const routesByDay = new Map(roadDays.map((day) => [day.id, routes.filter((leg) => leg.dayId === day.id)]))
+const ROUTE_PLAYBACK_SPEED_PX_PER_SECOND = 120
+const MAPLIBRE_TILE_SIZE = 512
+const DEFAULT_MAP_ZOOM = 4.25
+const TERRAIN_SOURCE_ID = 'terrain-dem'
+const HILLSHADE_SOURCE_ID = 'terrain-hillshade-dem'
+const TERRAIN_TILEJSON_URL = 'https://tiles.mapterhorn.com/tilejson.json'
+const TERRAIN_BEARING = -12
 window.routesByDay = routesByDay
 const roadRoute = {
   type: 'Feature' as const,
@@ -43,6 +51,13 @@ interface PlaceCluster {
   id: string
   placeIds: string[]
 }
+
+interface RouteMetrics {
+  distances: number[]
+  mercatorLength: number
+}
+
+const routeMetricsById = new Map<string, RouteMetrics>()
 
 function distanceBetween([lng1, lat1]: Coordinates, [lng2, lat2]: Coordinates) {
   const toRadians = (value: number) => value * Math.PI / 180
@@ -89,6 +104,16 @@ function getMapPadding(map: MapLibreMap) {
   return { top: 88, right: 72, bottom: 92, left: 72 }
 }
 
+function getTerrainPitch(width: number) {
+  if (width <= 560) return 44
+  if (width <= 820) return 50
+  return 58
+}
+
+function getTerrainExaggeration(width: number) {
+  return width <= 820 ? 1.1 : 1.3
+}
+
 function bearingBetween([lng1, lat1]: Coordinates, [lng2, lat2]: Coordinates) {
   const toRadians = (value: number) => value * Math.PI / 180
   const deltaLng = toRadians(lng2 - lng1)
@@ -99,12 +124,24 @@ function bearingBetween([lng1, lat1]: Coordinates, [lng2, lat2]: Coordinates) {
   return Math.atan2(y, x) * 180 / Math.PI
 }
 
-function interpolateLeg(leg: RouteLeg, progress: number) {
+function getRouteMetrics(leg: RouteLeg) {
+  const cached = routeMetricsById.get(leg.id)
+  if (cached) return cached
+
   const distances = [0]
   for (let index = 1; index < leg.coordinates.length; index += 1) {
-    distances.push(distances[index - 1] + distanceBetween(leg.coordinates[index - 1], leg.coordinates[index]))
+    const start = maplibregl.MercatorCoordinate.fromLngLat(leg.coordinates[index - 1])
+    const end = maplibregl.MercatorCoordinate.fromLngLat(leg.coordinates[index])
+    distances.push(distances[index - 1] + Math.hypot(end.x - start.x, end.y - start.y))
   }
-  const target = distances.at(-1)! * Math.max(0, Math.min(1, progress))
+  const metrics = { distances, mercatorLength: distances.at(-1) ?? 0 }
+  routeMetricsById.set(leg.id, metrics)
+  return metrics
+}
+
+function interpolateLeg(leg: RouteLeg, progress: number) {
+  const { distances, mercatorLength } = getRouteMetrics(leg)
+  const target = mercatorLength * Math.max(0, Math.min(1, progress))
   let index = 1
   while (index < distances.length && distances[index] < target) index += 1
   if (index >= distances.length) return { coordinate: leg.coordinates.at(-1)!, coordinates: leg.coordinates }
@@ -146,18 +183,22 @@ interface RoadMapProps {
   cameraResetRequest: number
   playback: PlaybackCursor | null
   onSelectPlace: (id: string) => void
+  onMapReady: (map: MapLibreMap | null) => void
 }
 
-function RoadMap({ selectedDay, selectedPlaceId, placeFocusRequest, cameraResetRequest, playback, onSelectPlace }: RoadMapProps) {
+function RoadMap({ selectedDay, selectedPlaceId, placeFocusRequest, cameraResetRequest, playback, onSelectPlace, onMapReady }: RoadMapProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<MapLibreMap | null>(null)
   const markersRef = useRef<Map<string, Marker>>(new Map())
   const vehicleMarkerRef = useRef<Marker | null>(null)
+  const vehicle3DLayerRef = useRef<RouteVehicle3DLayer | null>(null)
   const selectRef = useRef(onSelectPlace)
   const cameraModeRef = useRef<CameraMode>('overview')
   const activeClusterRef = useRef<string | null>(null)
   const automaticCameraRef = useRef(false)
   const lastFollowRef = useRef(0)
+  const [terrainStatus, setTerrainStatus] = useState<'loading' | 'ready' | 'fallback'>('loading')
+  const [vehicle3DReady, setVehicle3DReady] = useState(false)
 
   useEffect(() => {
     selectRef.current = onSelectPlace
@@ -179,6 +220,11 @@ function RoadMap({ selectedDay, selectedPlaceId, placeFocusRequest, cameraResetR
   useEffect(() => {
     const container = containerRef.current
     if (!container) return
+    let disposed = false
+    const compactTerrain = container.clientWidth <= 820
+    const terrainExaggeration = getTerrainExaggeration(container.clientWidth)
+    setTerrainStatus('loading')
+    setVehicle3DReady(false)
 
     const map = new maplibregl.Map({
       container,
@@ -191,20 +237,73 @@ function RoadMap({ selectedDay, selectedPlaceId, placeFocusRequest, cameraResetR
             tileSize: 256,
             attribution: '© OpenStreetMap contributors',
           },
+          [TERRAIN_SOURCE_ID]: {
+            type: 'raster-dem',
+            url: TERRAIN_TILEJSON_URL,
+            maxzoom: compactTerrain ? 11 : 14,
+          },
+          [HILLSHADE_SOURCE_ID]: {
+            type: 'raster-dem',
+            url: TERRAIN_TILEJSON_URL,
+            maxzoom: 14,
+          },
         },
         layers: [
           { id: 'paper', type: 'background', paint: { 'background-color': '#d8d4c7' } },
           { id: 'osm', type: 'raster', source: 'osm', paint: { 'raster-saturation': -0.78, 'raster-contrast': 0.12, 'raster-brightness-max': 0.86 } },
+          {
+            id: 'terrain-hillshade',
+            type: 'hillshade',
+            source: HILLSHADE_SOURCE_ID,
+            layout: { visibility: compactTerrain ? 'none' : 'visible' },
+            paint: {
+              'hillshade-accent-color': '#655f4d',
+              'hillshade-highlight-color': '#f2ead1',
+              'hillshade-shadow-color': '#2d3a35',
+              'hillshade-exaggeration': compactTerrain ? 0.22 : 0.32,
+            },
+          },
         ],
+        terrain: { source: TERRAIN_SOURCE_ID, exaggeration: terrainExaggeration },
+        sky: {
+          'sky-color': '#b9c7c6',
+          'horizon-color': '#eeeadd',
+          'fog-color': '#d9d4c5',
+          'fog-ground-blend': 0.58,
+          'horizon-fog-blend': 0.72,
+          'sky-horizon-blend': 0.86,
+        },
       },
       center: [99.5, 37.5],
       zoom: 4.25,
+      pitch: getTerrainPitch(container.clientWidth),
+      bearing: TERRAIN_BEARING,
+      maxPitch: 70,
+      canvasContextAttributes: { antialias: true },
       attributionControl: false,
       cooperativeGestures: true,
     })
 
     map.addControl(new maplibregl.NavigationControl({ showCompass: true }), 'bottom-right')
+    map.addControl(new maplibregl.TerrainControl({ source: TERRAIN_SOURCE_ID, exaggeration: terrainExaggeration }), 'bottom-right')
     map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left')
+
+    const terrainFallbackTimer = window.setTimeout(() => setTerrainStatus('fallback'), 12000)
+    const confirmTerrainReady = () => {
+      window.clearTimeout(terrainFallbackTimer)
+      setTerrainStatus('ready')
+    }
+    const markTerrainReady = () => {
+      if (!map.isStyleLoaded() || !map.isSourceLoaded(TERRAIN_SOURCE_ID)) return
+      confirmTerrainReady()
+    }
+    const handleTerrainSourceData = (event: maplibregl.MapSourceDataEvent) => {
+      if (event.sourceId !== TERRAIN_SOURCE_ID) return
+      if (event.sourceDataType === 'content') confirmTerrainReady()
+      else if (event.isSourceLoaded) markTerrainReady()
+    }
+    map.on('idle', markTerrainReady)
+    map.on('sourcedata', handleTerrainSourceData)
 
     const takeCameraControl = () => {
       if (!automaticCameraRef.current) cameraModeRef.current = 'manual'
@@ -214,7 +313,7 @@ function RoadMap({ selectedDay, selectedPlaceId, placeFocusRequest, cameraResetR
     map.on('rotatestart', takeCameraControl)
     map.on('moveend', () => { automaticCameraRef.current = false })
 
-    map.on('load', () => {
+    map.on('load', async () => {
       const arrowImage = document.createElement('canvas')
       arrowImage.width = 32
       arrowImage.height = 32
@@ -266,6 +365,18 @@ function RoadMap({ selectedDay, selectedPlaceId, placeFocusRequest, cameraResetR
       map.addSource('current-route', { type: 'geojson', data: emptyRoute() })
       map.addLayer({ id: 'current-route-halo', type: 'line', source: 'current-route', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#101716', 'line-width': 11, 'line-opacity': 0.92 } })
       map.addLayer({ id: 'current-route-line', type: 'line', source: 'current-route', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#e4ff65', 'line-width': 6.5, 'line-opacity': 1 } })
+      try {
+        const { RouteVehicle3DLayer } = await import('./routeVehicle3D')
+        if (disposed) return
+        const vehicle3DLayer = new RouteVehicle3DLayer(compactTerrain)
+        map.addLayer(vehicle3DLayer)
+        vehicle3DLayerRef.current = vehicle3DLayer
+        setVehicle3DReady(true)
+      } catch (error) {
+        console.warn('3D vehicle unavailable, using the 2D fallback marker.', error)
+        vehicle3DLayerRef.current = null
+        setVehicle3DReady(false)
+      }
     })
 
     Object.values(places).forEach((place) => {
@@ -301,9 +412,16 @@ function RoadMap({ selectedDay, selectedPlaceId, placeFocusRequest, cameraResetR
     vehicleMarkerRef.current = new maplibregl.Marker({ element: vehicleElement, anchor: 'center', rotationAlignment: 'map' })
 
     mapRef.current = map
+    onMapReady(map)
     return () => {
+      disposed = true
+      window.clearTimeout(terrainFallbackTimer)
+      map.off('idle', markTerrainReady)
+      map.off('sourcedata', handleTerrainSourceData)
+      onMapReady(null)
       markersRef.current.clear()
       vehicleMarkerRef.current = null
+      vehicle3DLayerRef.current = null
       map.remove()
       mapRef.current = null
     }
@@ -323,6 +441,7 @@ function RoadMap({ selectedDay, selectedPlaceId, placeFocusRequest, cameraResetR
       map.setPaintProperty('day-route-line', 'line-dasharray', selectedDay.phase === 'prologue' ? [1.5, 1.2] : [1, 0])
       map.setLayoutProperty('day-route-arrows', 'visibility', selectedDay.phase === 'road' ? 'visible' : 'none')
       vehicleMarkerRef.current?.remove()
+      vehicle3DLayerRef.current?.setVisible(false)
       const bounds = new maplibregl.LngLatBounds()
       if (coordinates.length) coordinates.forEach((route) => route.forEach((coordinate) => bounds.extend(coordinate)))
       else selectedDay.placeIds.forEach((id) => bounds.extend(places[id].coordinates))
@@ -338,10 +457,10 @@ function RoadMap({ selectedDay, selectedPlaceId, placeFocusRequest, cameraResetR
 
       if (boundsWidth < minBoundsSize || boundsHeight < minBoundsSize) {
         // 如果边界太小，使用较大的缩放级别
-        map.fitBounds(bounds, { padding: getMapPadding(map), maxZoom: 12, duration: reducedMotion ? 0 : 800, linear: true })
+        map.fitBounds(bounds, { padding: getMapPadding(map), maxZoom: 12, pitch: getTerrainPitch(map.getContainer().clientWidth), bearing: TERRAIN_BEARING, duration: reducedMotion ? 0 : 800, linear: true })
       } else {
         // 正常情况使用原缩放级别
-        map.fitBounds(bounds, { padding: getMapPadding(map), maxZoom: 8.2, duration: reducedMotion ? 0 : 800, linear: true })
+        map.fitBounds(bounds, { padding: getMapPadding(map), maxZoom: 8.2, pitch: getTerrainPitch(map.getContainer().clientWidth), bearing: TERRAIN_BEARING, duration: reducedMotion ? 0 : 800, linear: true })
       }
     }
     map.getSource('day-route') ? update() : map.once('load', update)
@@ -354,9 +473,21 @@ function RoadMap({ selectedDay, selectedPlaceId, placeFocusRequest, cameraResetR
       const traveledSource = map.getSource('traveled-route') as GeoJSONSource | undefined
       const currentSource = map.getSource('current-route') as GeoJSONSource | undefined
       const marker = vehicleMarkerRef.current
+      const vehicle3D = vehicle3DLayerRef.current
+      const updateVehicle = (coordinate: Coordinates, bearing: number) => {
+        if (vehicle3D) {
+          vehicle3D.setPose(coordinate, bearing)
+          marker?.remove()
+          return
+        }
+        if (!marker) return
+        marker.setLngLat(coordinate).setRotation(bearing)
+        if (!marker.getElement().parentElement) marker.addTo(map)
+      }
       if (!playback || playback.dayId !== selectedDay.id) {
         traveledSource?.setData(emptyRoute())
         currentSource?.setData(emptyRoute())
+        vehicle3D?.setVisible(false)
         marker?.remove()
         return
       }
@@ -365,9 +496,8 @@ function RoadMap({ selectedDay, selectedPlaceId, placeFocusRequest, cameraResetR
         traveledSource?.setData(multiLine(dayLegs.map((item) => item.coordinates)))
         currentSource?.setData(emptyRoute())
         const finalLeg = dayLegs.at(-1)
-        if (marker && finalLeg) {
-          marker.setLngLat(finalLeg.coordinates.at(-1)!).setRotation(bearingBetween(finalLeg.coordinates.at(-2)!, finalLeg.coordinates.at(-1)!))
-          if (!marker.getElement().parentElement) marker.addTo(map)
+        if (finalLeg) {
+          updateVehicle(finalLeg.coordinates.at(-1)!, bearingBetween(finalLeg.coordinates.at(-2)!, finalLeg.coordinates.at(-1)!))
         }
         return
       }
@@ -377,13 +507,10 @@ function RoadMap({ selectedDay, selectedPlaceId, placeFocusRequest, cameraResetR
       const completed = dayLegs.slice(0, playback.legIndex).map((item) => item.coordinates)
       traveledSource?.setData(multiLine(completed))
       currentSource?.setData(line(position.coordinates))
-      if (marker) {
-        const currentIndex = Math.max(0, Math.min(position.coordinates.length - 1, leg.coordinates.length - 1))
-        const previous = leg.coordinates[Math.max(0, currentIndex - 1)]
-        const next = leg.coordinates[Math.min(currentIndex + 1, leg.coordinates.length - 1)]
-        marker.setLngLat(position.coordinate).setRotation(bearingBetween(previous, next))
-        if (!marker.getElement().parentElement) marker.addTo(map)
-      }
+      const currentIndex = Math.max(0, Math.min(position.coordinates.length - 1, leg.coordinates.length - 1))
+      const previous = leg.coordinates[Math.max(0, currentIndex - 1)]
+      const next = leg.coordinates[Math.min(currentIndex + 1, leg.coordinates.length - 1)]
+      updateVehicle(position.coordinate, bearingBetween(previous, next))
 
       if (cameraModeRef.current === 'manual') return
       const clusters = getPlaceClusters(selectedDay.id)
@@ -414,7 +541,7 @@ function RoadMap({ selectedDay, selectedPlaceId, placeFocusRequest, cameraResetR
         cameraModeRef.current = 'overview'
         activeClusterRef.current = null
         automaticCameraRef.current = true
-        map.fitBounds(bounds, { padding: getMapPadding(map), maxZoom: 8.2, duration: reducedMotion ? 0 : 750, linear: true })
+        map.fitBounds(bounds, { padding: getMapPadding(map), maxZoom: 8.2, pitch: getTerrainPitch(map.getContainer().clientWidth), bearing: TERRAIN_BEARING, duration: reducedMotion ? 0 : 750, linear: true })
       } else {
         // 确保车轨迹图标始终在可视范围内，动态调整地图位置
         const point = map.project(position.coordinate)
@@ -480,11 +607,11 @@ function RoadMap({ selectedDay, selectedPlaceId, placeFocusRequest, cameraResetR
   }, [placeFocusRequest, selectedPlaceId])
 
   return (
-    <div className="map-shell" aria-label="河西走廊交互地图">
+    <div className="map-shell" aria-label="河西走廊 3D 地形交互地图">
       <div ref={containerRef} className="map-canvas" />
       <div className="map-topline" aria-hidden="true">
         <span>31.2°N—40.5°N</span>
-        <span>HEXI CORRIDOR / G30</span>
+        <span className={`terrain-status is-${terrainStatus}`}>{terrainStatus === 'ready' ? vehicle3DReady ? '3D SCENE / LIVE' : '3D TERRAIN / LIVE' : terrainStatus === 'fallback' ? '2D TERRAIN / FALLBACK' : '3D TERRAIN / LOADING'}</span>
       </div>
       <div className="map-legend">
         <span><i className="legend-line" style={{ background: selectedDay.accent }} />当日路线</span>
@@ -577,6 +704,7 @@ function App() {
   const [isPlaying, setIsPlaying] = useState(false)
   const [playback, setPlayback] = useState<PlaybackCursor | null>(null)
   const [playbackRequest, setPlaybackRequest] = useState(0)
+  const playbackMapRef = useRef<MapLibreMap | null>(null)
   const selectedDay = days[selectedIndex]
   const selectedPlace = places[selectedPlaceId]
   const selectedLegs = routesByDay.get(selectedDay.id) ?? []
@@ -590,6 +718,10 @@ function App() {
     distance: roadDays.reduce((total, day) => total + Number(day.distance?.match(/\d+/)?.[0] ?? 0), 0),
     places: new Set(days.flatMap((day) => day.placeIds)).size,
   }), [])
+
+  const registerPlaybackMap = useCallback((map: MapLibreMap | null) => {
+    playbackMapRef.current = map
+  }, [])
 
   const selectDay = useCallback((index: number) => {
     const nextIndex = Math.max(0, Math.min(days.length - 1, index))
@@ -619,18 +751,23 @@ function App() {
     }
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     let frame = 0
-    let startTime: number | null = null
-    const startProgress = playback.legProgress
+    let previousTime: number | null = null
+    let currentProgress = playback.legProgress
     const leg = dayLegs[playback.legIndex]
     if (!leg) return
     setSelectedPlaceId(leg.from)
-    // 保证路线绘制速度一致，设置固定速度（例如：每秒移动 50 公里）
-    const fixedSpeed = 50 // 公里/秒
-    const duration = reducedMotion ? 550 : Math.max(1000, Math.min(10000, leg.distanceKm / fixedSpeed * 1000))
+    const { mercatorLength } = getRouteMetrics(leg)
 
     const advance = (time: number) => {
-      if (startTime === null) startTime = time
-      const progress = reducedMotion ? 1 : Math.min(1, startProgress + (time - startTime) / duration)
+      if (previousTime !== null && !reducedMotion) {
+        const zoom = playbackMapRef.current?.getZoom() ?? DEFAULT_MAP_ZOOM
+        const routePixelLength = mercatorLength * MAPLIBRE_TILE_SIZE * 2 ** zoom
+        currentProgress = routePixelLength > 0
+          ? Math.min(1, currentProgress + (time - previousTime) / 1000 * ROUTE_PLAYBACK_SPEED_PX_PER_SECOND / routePixelLength)
+          : 1
+      }
+      previousTime = time
+      const progress = reducedMotion ? 1 : currentProgress
       setPlayback({ dayId: selectedDay.id, legIndex: playback.legIndex, legProgress: progress })
       if (progress < 1) {
         frame = window.requestAnimationFrame(advance)
@@ -700,7 +837,7 @@ function App() {
       <DateRail selectedIndex={selectedIndex} onSelect={selectDay} />
 
       <section className="hero-grid">
-        <RoadMap selectedDay={selectedDay} selectedPlaceId={selectedPlaceId} placeFocusRequest={placeFocusRequest} cameraResetRequest={playbackRequest} playback={playback} onSelectPlace={selectPlace} />
+        <RoadMap selectedDay={selectedDay} selectedPlaceId={selectedPlaceId} placeFocusRequest={placeFocusRequest} cameraResetRequest={playbackRequest} playback={playback} onSelectPlace={selectPlace} onMapReady={registerPlaybackMap} />
         <aside className="day-card" style={{ '--accent': selectedDay.accent } as React.CSSProperties}>
           <div className="day-card-head">
             <span className="day-number">{selectedDay.dayNumber}</span>
